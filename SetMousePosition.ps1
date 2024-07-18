@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 public class User32 {
     [DllImport("user32.dll")]
-    public static extern bool SetCursorPos(int X, int Y);
+    public static extern bool SetCursorPos(int x, int y);
 }
 "@
 

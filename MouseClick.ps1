@@ -11,13 +11,6 @@ public class User32 {
 }
 "@
 
-# Function to perform a left mouse button click
-function PerformMouseClick {
-    [User32]::mouse_event([User32]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    Start-Sleep -Milliseconds 100
-    [User32]::mouse_event([User32]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-}
-
-# Example usage:
-PerformMouseClick
-Write-Output "Left mouse button click performed."
+[User32]::mouse_event([User32]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+Start-Sleep -Milliseconds 100
+[User32]::mouse_event([User32]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
