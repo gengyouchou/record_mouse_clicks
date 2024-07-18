@@ -1,51 +1,49 @@
 Set objShell = CreateObject("WScript.Shell")
 Set objFSO = CreateObject("Scripting.FileSystemObject")
 
-' Ask user if they want to start recording mouse clicks
-msg = "Click OK to start recording mouse clicks."
-response = MsgBox(msg, vbOKOnly)
-If response = vbOK Then
-    ' Recording mode
-    Set objFile = objFSO.CreateTextFile("mouse_clicks.txt", True)
-    Dim count
-    count = 0
-    Do
-        ' Wait for the user to press 's' key to record mouse position
-        Do
-            If objShell.AppActivate("Record Mouse Position") Then
-                If objShell.SendKeys("{s}") Then
-                    Exit Do
-                End If
-            End If
-            WScript.Sleep 100
-        Loop
+' Ask user to start recording mouse clicks
+msg = "Press 'OK' to start recording mouse clicks. Press 'Cancel' to stop."
+response = MsgBox(msg, vbOKCancel, "Mouse Click Recorder")
 
-        ' Get cursor position
-        GetCursorPos x, y
-
-        ' Write the coordinates to the output file
-        objFile.WriteLine x & "," & y
-        count = count + 1
-
-        ' Display message that recording is done for this click
-        MsgBox "Mouse click recorded at (" & x & ", " & y & "). Press 's' to record another click, or Cancel to finish.", vbOKCancel, "Mouse Click Recorder"
-    Loop While MsgBox("Press 's' to record another mouse position. Click Cancel to finish recording.", vbOKCancel) = vbOK
-
-    objFile.Close
-    MsgBox count & " mouse click positions saved to mouse_clicks.txt."
+If response = vbCancel Then
+    WScript.Quit
 End If
 
-' Function to set cursor position
-Sub SetCursorPos(x, y)
-    Set objShell = CreateObject("WScript.Shell")
-    objShell.Run "powershell -ExecutionPolicy Bypass -File .\SetMousePosition.ps1 -x " & x & " -y " & y, 0, True
-End Sub
+' Recording mode
+Set objFile = objFSO.CreateTextFile("mouse_clicks.txt", True)
+Dim count
+count = 0
+Do
+    ' Prompt user to press 's' key to record mouse position
+    response = MsgBox("Press 's' to record the current mouse position. Press 'Cancel' to stop.", vbOKCancel, "Mouse Click Recorder")
+    If response = vbCancel Then
+        Exit Do
+    End If
+    
+    ' Wait for 's' key press
+    Do
+        WScript.Sleep 100
+        If objShell.Exec("powershell -command {if ([console]::KeyAvailable) {[console]::ReadKey($true).Key}}").StdOut.ReadLine() = "S" Then
+            Exit Do
+        End If
+    Loop
 
-' Function to perform a mouse click
-Sub MouseClick()
-    Set objShell = CreateObject("WScript.Shell")
-    objShell.Run "powershell -ExecutionPolicy Bypass -File .\MouseClick.ps1", 0, True
-End Sub
+    ' Get cursor position
+    GetCursorPos x, y
+
+    ' Write the coordinates to the output file
+    objFile.WriteLine x & "," & y
+    count = count + 1
+
+    ' Display message that recording is done for this click
+    response = MsgBox("Mouse click recorded at (" & x & ", " & y & "). Press 's' to record another click, or 'Cancel' to finish.", vbOKCancel, "Mouse Click Recorder")
+    If response = vbCancel Then
+        Exit Do
+    End If
+Loop
+
+objFile.Close
+MsgBox count & " mouse click positions saved to mouse_clicks.txt.", vbInformation, "Mouse Click Recorder"
 
 ' Function to get cursor position using PowerShell script
 Sub GetCursorPos(ByRef x, ByRef y)
