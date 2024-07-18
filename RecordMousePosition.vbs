@@ -1,10 +1,6 @@
 Set objShell = CreateObject("WScript.Shell")
 Set objFSO = CreateObject("Scripting.FileSystemObject")
 
-' Ask user to start recording mouse clicks
-msg = "Press 's' to record the current mouse position. Press 'Cancel' to stop."
-response = MsgBox(msg, vbOKCancel, "Mouse Click Recorder")
-
 If response = vbCancel Then
     WScript.Quit
 End If
@@ -66,7 +62,8 @@ End Sub
 ' Function to check if a specific key is pressed using GetAsyncKeyState API
 Function GetAsyncKeyState(vKey)
     Dim objExec, result
-    Set objExec = objShell.Exec("powershell -ExecutionPolicy Bypass -File .\GetKeyState.ps1 -vKey " & vKey)
+    ' Execute PowerShell script minimized
+    Set objExec = objShell.Exec("powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File .\GetKeyState.ps1 -vKey " & vKey)
     result = objExec.StdOut.ReadLine()
     If CInt(result) <> 0 Then
         GetAsyncKeyState = True
